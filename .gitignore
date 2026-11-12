@@ -1,0 +1,31 @@
+# Lab handouts and reference material (not part of the project source)
+INF1103_*.docx
+INF1103_*.pdf
+*.zip
+Week 9 Info/
+
+# Submission write-ups / screenshots (submitted separately, not source code)
+Predict_First_Notes*.docx
+~$*.docx
+
+# AI assistant files
+CLAUDE.md
+.claude/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Local environment variables
+.env
+
+# IDE settings
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
