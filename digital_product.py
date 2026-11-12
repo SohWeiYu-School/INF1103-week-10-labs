@@ -1,10 +1,12 @@
 from product import Product
+from supplier import Supplier
+
 
 class DigitalProduct(Product):
-
-    def __init__(self, product_id, name, price, stock, download_size):
-        super().__init__(product_id, name, price, stock)
-        self.__download_size = download_size
+    def __init__(self, product_id: str, name: str, price: float,
+                 stock_quantity: int, supplier: Supplier, download_size: float):
+        super().__init__(product_id, name, price, stock_quantity, supplier)
+        self.__download_size: float = download_size
 
     def get_download_size(self):
         return self.__download_size
@@ -17,6 +19,7 @@ class DigitalProduct(Product):
         return "Delivered digitally via download link"
 
 if __name__ == "__main__":
-    windows = DigitalProduct("D001", "Windows 11", 199.0, 100, 5000)
+    supplier = Supplier("S002", "SoftWorld Distribution", "orders@softworld.com")
+    windows = DigitalProduct("D001", "Windows 11", 199.0, 100, supplier, 5000)
     windows.display_information()
     print(windows.get_fulfilment_info())
