@@ -2,7 +2,9 @@ import json
 import os
 
 from inventory import Inventory
+from order import Order
 from supplier import Supplier
+from product import Product
 from physical_product import PhysicalProduct
 from digital_product import DigitalProduct
 
@@ -10,7 +12,7 @@ from digital_product import DigitalProduct
 INVENTORY_FILE = "inventory.json"
 
 
-def load_default_products(inventory, suppliers):
+def load_default_products(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
     techsource = Supplier("S001", "TechSource Pte Ltd", "sales@techsource.com")
     softworld = Supplier("S002", "SoftWorld Distribution", "orders@softworld.com")
     suppliers["S001"] = techsource
@@ -21,7 +23,7 @@ def load_default_products(inventory, suppliers):
     inventory.add_product(DigitalProduct("D001", "Windows 11", 199.00, 100, softworld, 5000))
 
 
-def load_inventory(inventory, suppliers):
+def load_inventory(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
     if os.path.exists(INVENTORY_FILE):
         print(f"{INVENTORY_FILE} found.")
         with open(INVENTORY_FILE, "r") as f:
@@ -30,6 +32,7 @@ def load_inventory(inventory, suppliers):
             suppliers[item["id"]] = Supplier(item["id"], item["name"], item["email"])
         for item in data["products"]:
             supplier = suppliers[item["supplier_id"]]
+            product: Product
             if item["type"] == "physical":
                 product = PhysicalProduct(item["id"], item["name"], item["price"], item["stock"], supplier, item["weight"])
             else:
@@ -41,7 +44,7 @@ def load_inventory(inventory, suppliers):
         load_default_products(inventory, suppliers)
 
 
-def save_inventory(inventory, suppliers):
+def save_inventory(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
     print("\nSaving inventory...")
     supplier_data = []
     for supplier in suppliers.values():
@@ -52,7 +55,7 @@ def save_inventory(inventory, suppliers):
         })
     product_data = []
     for product in inventory.get_products():
-        item = {
+        item: dict[str, str | float | int] = {
             "id": product.get_product_id(),
             "name": product.get_name(),
             "price": product.get_price(),
@@ -71,7 +74,7 @@ def save_inventory(inventory, suppliers):
     print(f"Inventory saved successfully to {INVENTORY_FILE}.")
 
 
-def add_product(inventory, suppliers):
+def add_product(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
     print("\nAdd New Product")
     product_id = input("Product ID: ")
     name = input("Product Name: ")
@@ -84,6 +87,7 @@ def add_product(inventory, suppliers):
     supplier = suppliers[supplier_id]
     product_type = input("Type (physical/digital): ").strip().lower()
 
+    product: Product
     if product_type == "physical":
         weight = float(input("Weight (kg): "))
         product = PhysicalProduct(product_id, name, price, stock, supplier, weight)
@@ -98,7 +102,7 @@ def add_product(inventory, suppliers):
     print("Product added successfully!")
 
 
-def update_stock(inventory):
+def update_stock(inventory: Inventory) -> None:
     print("\nUpdate Stock")
     product_id = input("Enter Product ID: ")
     product = inventory.find_product(product_id)
@@ -111,7 +115,7 @@ def update_stock(inventory):
         print("Stock updated successfully!")
 
 
-def search_product(inventory):
+def search_product(inventory: Inventory) -> None:
     print("\nSearch Product")
     product_id = input("Enter Product ID: ")
     product = inventory.find_product(product_id)
@@ -125,13 +129,29 @@ def search_product(inventory):
     print("-" * 48)
 
 
-def main():
+def create_order(inventory: Inventory) -> None:
+    print("\nCreate Order")
+    order = Order(input("Order ID: "))
+    while True:
+        product_id = input("Product ID (blank to finish): ")
+        if product_id == "":
+            break
+        product = inventory.find_product(product_id)
+        if product is None:
+            print("Product not found.")
+            continue
+        quantity = int(input("Quantity: "))
+        order.add_order_line(product, quantity)
+    order.display_order()
+
+
+def main() -> None:
     print("=" * 40)
     print("INVENTORY MANAGEMENT SYSTEM")
     print("=" * 40)
 
     inventory = Inventory()
-    suppliers = {}
+    suppliers: dict[str, Supplier] = {}
     load_inventory(inventory, suppliers)
 
     while True:
@@ -140,8 +160,9 @@ def main():
         print("2. Add Product")
         print("3. Update Stock")
         print("4. Search Product")
-        print("5. Save Inventory")
-        print("6. Exit")
+        print("5. Create Order")
+        print("6. Save Inventory")
+        print("7. Exit")
         print("----------------------------")
 
         option = input("Enter option: ")
@@ -155,15 +176,17 @@ def main():
         elif option == "4":
             search_product(inventory)
         elif option == "5":
-            save_inventory(inventory, suppliers)
+            create_order(inventory)
         elif option == "6":
+            save_inventory(inventory, suppliers)
+        elif option == "7":
             print("\nSaving inventory before exit...")
             save_inventory(inventory, suppliers)
             print("Thank you for using Inventory Management System.")
             print("Program terminated.")
             break
         else:
-            print("Invalid option. Please enter 1-6.")
+            print("Invalid option. Please enter 1-7.")
 
 
 if __name__ == "__main__":
